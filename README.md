@@ -2,7 +2,7 @@
  
 基于`Golang`和`Redis`，实现的分布式锁。
 
-提供了两种锁方式：基于SetNX和BLPop。
+提供了两种锁方式：基于SetNX+PubSub和BLPop。
 
 ## 性能对比、正确性校验
 
@@ -24,7 +24,7 @@ OP nums: 10000
 1. 所有用户Sub同一个频道；
 2. Lock()：用户监听频道，有消息后尝试SetNX；
 3. SetNX成功代表取得锁，进行操作；SetNX失败则继续监听频道；
-4. Unock()，先删除key，再Pub消息
+4. Unlock()，先删除key，再Pub消息.
 
 **实现细节**：
 ```go
@@ -59,12 +59,12 @@ func (m *NxMutex) Unlock() {
 
 利用队列的阻塞读BLPOP()避免锁竞争。
 
-**特点**：`阻塞式`，`非竞争式`。不存在竞争，效率比利用NetNX和订阅要高。
+**特点**：`阻塞式`，`非竞争式`。不存在竞争，效率比利用SetNX和订阅要高。
 
 **过程**：
-1. 初始化一个只有一个元素的List
-2. Lock()：调用BLPOP()阻塞pop元素
-3. Unlock(): PUSH（几种方法都可以）一个元素进List
+1. 初始化一个只有一个元素的List;
+2. Lock()：调用BLPop()，阻塞式pop;
+3. Unlock(): Push()（几种方法都可以）一个元素进List.
 
 **实现细节**：
 ```go
