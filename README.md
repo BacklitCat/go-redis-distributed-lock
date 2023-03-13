@@ -20,6 +20,8 @@ OP nums: 10000
 
 **特点**：`阻塞式`，`竞争式`。
 
+![img](pic/NxMutex.svg)
+
 **过程**：
 1. 所有用户Sub同一个频道；
 2. Lock()：用户监听频道，有消息后尝试SetNX；
@@ -60,6 +62,8 @@ func (m *NxMutex) Unlock() {
 利用队列的阻塞读BLPOP()避免锁竞争。
 
 **特点**：`阻塞式`，`非竞争式`。不存在竞争，效率比利用SetNX和订阅要高。
+
+![img](pic/ListMutex.svg)
 
 **过程**：
 1. 初始化一个只有一个元素的List;
